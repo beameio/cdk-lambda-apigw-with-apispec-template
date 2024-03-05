@@ -1,0 +1,23 @@
+env:
+  node: true
+  es2020: true
+  jest: true
+extends:
+  - eslint:recommended
+  - plugin:@typescript-eslint/recommended
+parser: '@typescript-eslint/parser'
+parserOptions:
+  project: ./tsconfig.json
+  ecmaVersion: latest
+  sourceType: module
+plugins:
+  - '@typescript-eslint'
+ignorePatterns: ["node_modules", "jest.config.ts", "**/*.spec.ts", "**/*.test.ts", "**/*.d.ts"]
+rules: {
+  linebreak-style: ["error", "unix"],
+  indent: ["warn", "tab", { "SwitchCase": 1 }],
+  quotes: ["error", "single", { "allowTemplateLiterals": true }],
+  no-mixed-spaces-and-tabs: ["error", "smart-tabs"],
+  object-curly-spacing: [ "warn", "never" ],
+  space-in-parens: ["warn", "never"],
+}

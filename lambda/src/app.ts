@@ -1,6 +1,7 @@
 import DEBUG from 'debug';
 import serverless from 'serverless-http';
 import cors from 'cors';
+import assert from 'assert';
 import express from 'express';
 import * as OpenApiValidator from 'express-openapi-validator';
 import {RouteMetadata} from 'express-openapi-validator/dist/framework/openapi.spec.loader';
@@ -28,19 +29,19 @@ app.use(OpenApiValidator.middleware({
 		// override because default resolver doesn't import correctly ES modules
 		// and also avoids having x-eov-operation-handler in the openapi spec
 		resolver: (basePath: string, route: RouteMetadata, apiDoc: OpenAPIV3.Document) => {
-			const pathKey = route.openApiRoute.substring(route.basePath.length);
-			const method = route.method.toLowerCase();
-			const schema = apiDoc.paths[pathKey][method];
+			type methodTypes = 'get' | 'put' | 'post' | 'delete' | 'options' | 'head' | 'patch' | 'trace';
+			const method = route.method.toLowerCase() as methodTypes;
+			const path = route.openApiRoute.substring(route.basePath.length);
+			const operation = apiDoc.paths[path][method];
+			assert(operation, `Unable to find operation with '${path}' and '${method}'`);
+			const operationId = operation.operationId;
+			assert(operationId, `OperationId is not available for operation with '${path}' and '${method}'`);
+			const func = routes[operationId as keyof typeof routes];
+			assert(func, `Could not find ${operationId} function in routes when trying to route [${route.method} ${route.expressRoute}].`)
 
-			// x-eov-operation-id takes priority over operationId
-			const fn = schema['x-eov-operation-id'] || schema['operationId'];
-			const func = routes[fn]; // use already imported routes instead of x-eov-operation-handler to get file name
-
-			if (!func) {
-				throw new Error(`Could not find [${fn}] function in route.js when trying to route [${route.method} ${route.expressRoute}].`);
-			}
 			return func.constructor.name === 'AsyncFunction'
-				? (req: express.Request, res: express.Response, next: express.NextFunction) => Promise.resolve(func(req, res)).catch(next) // handle async function in express (https://bobbyhadz.com/blog/javascript-check-if-function-is-async)
+				// @ts-ignore
+				? (req: express.Request, res: express.Response, next: express.NextFunction) => Promise.resolve(func(req, res, next)).catch(next) // handle async function in express (https://bobbyhadz.com/blog/javascript-check-if-function-is-async)
 				: func;
 		}
 	}

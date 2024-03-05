@@ -5,23 +5,22 @@ import * as defaultMiddlewares from './middlewares';
 
 const debug = DEBUG('beame:lambda:routes');
 
-export default async function init(requiresIAM = defaultMiddlewares.requiresIAM) {
+export default function init(requiresIAM = defaultMiddlewares.requiresIAM) {
 	return {
 		// users
-		// post_users: [async (req, res) => {
-		// 	debug('Creating Users:', req.body);
-		// 	return sendOK(res);
-		// 	// const saved = await Developer.save(req.body);
-		// 	// debug('Saved Developer:', saved);
-		// 	// sendOK(res, {id: saved.id}, 201);
-		// }],
 		get_users: [async (req: Request, res: Response) => {
 			debug('Getting All Users');
 			return sendOK(res);
 			// const results = await Developer.find({withDeleted: true});
 			// sendOK(res, {results});
 		}],
-
+		post_users: [async (req: Request, res: Response) => {
+			debug('Creating Users:', req.body);
+			return sendOK(res);
+			// const saved = await Developer.save(req.body);
+			// debug('Saved Developer:', saved);
+			// sendOK(res, {id: saved.id}, 201);
+		}],
 		get_user: [async (req: Request, res: Response) => {
 			debug('Getting User:', req.params.user_id);
 			return sendOK(res);

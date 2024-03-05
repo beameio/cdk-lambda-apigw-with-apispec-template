@@ -12,7 +12,7 @@ import initRoutes from './routes';
 import {debugRequest, extractToken, handleError, RequestWithContext, ContextType} from './middlewares';
 
 const debug = DEBUG('beame:lambda:api:index');
-const routes = await initRoutes();
+const routes = initRoutes();
 
 const app = express();
 app.use(cors());
@@ -20,7 +20,7 @@ app.use(express.json()); // automatically parse the incoming requests with JSON 
 app.use(debugRequest);
 app.use(extractToken); // extracts JWT token (if existing)
 app.use(OpenApiValidator.middleware({
-	apiSpec: (isLambdaEnv ? './' : './../../') + 'openapi.yaml', // openapi spec is copied to the function folder
+	apiSpec: (isLambdaEnv ? './' : './../') + 'openapi.yaml', // openapi spec is copied to the function folder
 	validateApiSpec: true,
 	validateRequests: true, // (default)
 	validateResponses: true, // false by default,
@@ -37,7 +37,7 @@ app.use(OpenApiValidator.middleware({
 			const operationId = operation.operationId;
 			assert(operationId, `OperationId is not available for operation with '${path}' and '${method}'`);
 			const func = routes[operationId as keyof typeof routes];
-			assert(func, `Could not find ${operationId} function in routes when trying to route [${route.method} ${route.expressRoute}].`)
+			assert(func, `Could not find '${operationId}' function in routes when trying to route [${route.method} ${route.expressRoute}].`)
 
 			return func.constructor.name === 'AsyncFunction'
 				// @ts-ignore
@@ -57,7 +57,8 @@ export const handler = serverless(app, {
 });
 
 if (!isLambdaEnv) {
-	app.listen(5000, () => {
-		console.log(`application is listening on port 5000`);
+	const port = 5001;
+	app.listen(port, () => {
+		console.log(`application is listening on port ${port}`);
 	});
 }

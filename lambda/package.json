@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "Example of a lambda function using express and openapi spec",
   "private": true,
-  "type": "module",
   "main": "src/app.js",
   "scripts": {
     "test": "npm run build && NODE_OPTIONS=--experimental-vm-modules npx jest --detectOpenHandles --forceExit",

@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   title: Template API Spec
   description: APIs for the template example
-  version: "0.1"
+  version: "1.0"
 
 servers:
   - url: https://development.template_server.com/v1
@@ -13,11 +13,10 @@ servers:
     description: Production server
 
 tags:
-  - name: Users
-    description: User operation related endpoints
-
-security: # default security for operations
-  - user_auth: [ profile, openid, email ]
+  - name: DateTime
+    description: DateTime related endpoints
+  - name: Operations
+    description: Operations related endpoints
 
 components:
   securitySchemes:
@@ -27,10 +26,6 @@ components:
       name: x-amz-security-token
       x-amazon-apigateway-authtype: 'awsSigv4'
       description: 'IAM access. Used by internal infrastructure, like cognito and lambdas'
-    api_key:
-      type: apiKey
-      name: api_key
-      in: header
     user_auth:
       type: oauth2
       flows:
@@ -42,16 +37,30 @@ components:
             profile: Grants auth2 profile
             email: Grants auth2 email scope
       description: 'User authenticated access'
-  parameters:
-    user_id:
-      name: user_id
-      description: User Id
-      in: path
+
+  requestBodies:
+    operations_request:
+      description: The request body for an operation call
       required: true
-      schema:
-        type: integer
-        minimum: 1
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/two_numbers_schema'
+
   responses:
+    operations_response:
+      description: The response of an operation call
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - result
+            properties:
+              result:
+                type: number
+                format: double
+                description: The result of the operation
     success:
       description: Operation has completed successfully
     problem:
@@ -90,67 +99,30 @@ components:
           example:
             title: Not Found
             status: 404
-
   schemas:
-    id_type:
-      type: integer
-      readOnly: true
-      description: ID
-    id_schema:
+    two_numbers_schema:
       type: object
       required:
-        - id
+        - first
+        - second
       properties:
-        id:
-          $ref: '#/components/schemas/id_type'
-    dates_schema:
-      type: object
-      properties:
-        created_at:
-          type: string
-          format: date-time
-          readOnly: true
-        updated_at:
-          type: string
-          format: date-time
-          nullable: true
-          readOnly: true
-        deleted_at:
-          type: string
-          format: date-time
-          nullable: true
-          readOnly: true
-
-    user_request_schema:
-      allOf:
-        - type: object
-          required:
-            - email
-          properties:
-            email:
-              type: string
-              description: the user email
-            firstName:
-              type: string
-              description: the user first name
-            lastName:
-              type: string
-              description: the user last name
-    user_response_schema:
-      allOf:
-        - $ref: '#/components/schemas/id_schema'
-        - $ref: '#/components/schemas/dates_schema'
-        - $ref: '#/components/schemas/user_request_schema'
-
+        first:
+          type: number
+          format: double
+          description: the first number
+        second:
+          type: number
+          format: double
+          description: the second number
 
 paths:
-  # Users
-  /users:
+  /datetime:
     get:
-      operationId: get_users
+      operationId: get_datetime
       tags:
-        - Users
-      description: Retrieves all users
+        - DateTime
+      description: Retrieves the api current date time
+      security: [] # No Security
       responses:
         '200':
           description: Operation has completed successfully
@@ -158,88 +130,74 @@ paths:
             application/json:
               schema:
                 type: object
-                required:
-                  - results
                 properties:
-                  results:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/user_response_schema'
+                  result:
+                    type: string
+                    format: date-time
+                    readOnly: true
         '4XX':
           $ref: '#/components/responses/problem'
 
+  /addition:
     post:
-      operationId: post_users
+      operationId: post_addition
       tags:
-        - Users
-      description: Creates multiple users
+        - Operations
+      description: Calculates the addition of 2 numbers
+      security:
+        - user_auth: [ profile, openid, email ]
       requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/user_request_schema'
-        required: true
-      responses:
-        '201':
-          description: Users were created successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/id_schema'
-        '4XX':
-          $ref: '#/components/responses/problem'
-
-  /users/{user_id}:
-    get:
-      operationId: get_user
-      tags:
-        - Users
-      description: Retrieves a user
-      parameters:
-        - $ref: '#/components/parameters/user_id'
+        $ref: '#/components/requestBodies/operations_request'
       responses:
         '200':
-          description: Operation has completed successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/user_response_schema'
+          $ref: '#/components/responses/operations_response'
         '4XX':
           $ref: '#/components/responses/problem'
 
-    put:
-      operationId: put_user
+  /subtraction:
+    post:
+      operationId: post_subtraction
       tags:
-        - Users
-      description: Updates a user
-      parameters:
-        - $ref: '#/components/parameters/user_id'
+        - Operations
+      description: Calculates the subtraction of 2 numbers
+      security:
+        - user_auth: [ profile, openid, email ]
       requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/user_request_schema'
-        required: true
+        $ref: '#/components/requestBodies/operations_request'
       responses:
         '200':
-          description: User was updated successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/user_response_schema'
+          $ref: '#/components/responses/operations_response'
         '4XX':
           $ref: '#/components/responses/problem'
 
-
-    delete:
-      operationId: delete_user
+  /multiplication:
+    post:
+      operationId: post_multiplication
       tags:
-        - Users
-      description: Deletes a user
-      parameters:
-        - $ref: '#/components/parameters/user_id'
+        - Operations
+      description: Calculates the multiplication of 2 numbers
+      security:
+        - user_auth: [ profile, openid, email ]
+      requestBody:
+        $ref: '#/components/requestBodies/operations_request'
       responses:
         '200':
-          $ref: '#/components/responses/success'
+          $ref: '#/components/responses/operations_response'
+        '4XX':
+          $ref: '#/components/responses/problem'
+
+  /division:
+    post:
+      operationId: post_division
+      tags:
+        - Operations
+      description: Calculates the division of 2 numbers
+      security:
+        - iam_auth: [ ]
+      requestBody:
+        $ref: '#/components/requestBodies/operations_request'
+      responses:
+        '200':
+          $ref: '#/components/responses/operations_response'
         '4XX':
           $ref: '#/components/responses/problem'

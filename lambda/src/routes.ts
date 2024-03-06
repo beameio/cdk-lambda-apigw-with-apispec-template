@@ -7,42 +7,44 @@ const debug = DEBUG('beame:lambda:routes');
 
 export default function init(requiresIAM = defaultMiddlewares.requiresIAM) {
 	return {
-		// users
-		get_users: [async (req: Request, res: Response) => {
-			debug('Getting All Users');
-			return sendOK(res);
-			// const results = await Developer.find({withDeleted: true});
-			// sendOK(res, {results});
+		// datetime
+		get_datetime: [async (req: Request, res: Response) => {
+			debug('get_datetime');
+			return sendOK(res, {result: new Date()});
 		}],
-		post_users: [async (req: Request, res: Response) => {
-			debug('Creating Users:', req.body);
-			return sendOK(res);
-			// const saved = await Developer.save(req.body);
-			// debug('Saved Developer:', saved);
-			// sendOK(res, {id: saved.id}, 201);
+
+		// operations
+		post_addition: [defaultMiddlewares.setNoCache, async (req: Request, res: Response) => {
+			debug('post_addition - ', req.body);
+			try {
+				return sendOK(res, {result: req.body.first + req.body.second});
+			} catch(ex) {
+				sendError(res, 400, ex);
+			}
 		}],
-		get_user: [async (req: Request, res: Response) => {
-			debug('Getting User:', req.params.user_id);
-			return sendOK(res);
-			// const result = await Developer.findOneBy({id: req.params.developer_id});
-			// result ? sendOK(res, result) : sendError(res, 400, 'Developer not found');
+		post_subtraction: [defaultMiddlewares.setNoCache, async (req: Request, res: Response) => {
+			debug('post_subtraction - ', req.body);
+			try {
+				return sendOK(res, {result: req.body.first - req.body.second});
+			} catch(ex) {
+				sendError(res, 400, ex);
+			}
 		}],
-		put_user: [defaultMiddlewares.setNoCache, async (req: Request, res: Response) => {
-			debug('Updating User:', req.params.user_id);
-			return sendOK(res);
-			// const result = await Developer.update({id: req.params.developer_id}, req.body);
-			// result.affected > 0 ? sendOK(res) : sendError(res, 400, 'Unable to update Developer');
+		post_multiplication: [defaultMiddlewares.setNoCache, async (req: Request, res: Response) => {
+			debug('post_multiplication - ', req.body);
+			try {
+				return sendOK(res, {result: req.body.first * req.body.second});
+			} catch(ex) {
+				sendError(res, 400, ex);
+			}
 		}],
-		delete_user: [requiresIAM, async (req: Request, res: Response) => {
-			debug('Deleting User:', req.params.user_id);
-			return sendOK(res);
-			// const developer = await Developer.findOne({relations: {identities: true}, where: {id: req.params.developer_id}});
-			// if(developer) {
-			// 	await Promise.all(developer.identities.map(x => x.softRemove()));
-			// 	await developer.softRemove();
-			// 	return sendOK(res);
-			// }
-			// sendError(res, 400, 'Developer not found');
+		post_division: [defaultMiddlewares.setNoCache, requiresIAM, async (req: Request, res: Response) => {
+			debug('post_division - ', req.body);
+			try {
+				return sendOK(res, {result: req.body.first / req.body.second});
+			} catch(ex) {
+				sendError(res, 400, ex);
+			}
 		}],
 	}
 }

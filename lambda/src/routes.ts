@@ -5,7 +5,7 @@ import * as defaultMiddlewares from './middlewares';
 
 const debug = DEBUG('beame:lambda:routes');
 
-export default function init(requiresIAM = defaultMiddlewares.requiresIAM) {
+export default function init(requiresIAM = defaultMiddlewares.requiresIAM, setNoCache = defaultMiddlewares.setNoCache) {
 	return {
 		// datetime
 		get_datetime: [async (req: Request, res: Response) => {
@@ -14,34 +14,47 @@ export default function init(requiresIAM = defaultMiddlewares.requiresIAM) {
 		}],
 
 		// operations
-		post_addition: [defaultMiddlewares.setNoCache, async (req: Request, res: Response) => {
-			debug('post_addition - ', req.body);
+		post_addition: [async (req: Request, res: Response) => {
+			debug('post_addition - %o', req.body);
+			// Example on using authentication payload (parsed already via middleware when available)
+			debug('authentication headers - %s', req.headers.authorization);
+			debug('authentication payload - %s', res.locals.token_payload);
 			try {
-				return sendOK(res, {result: req.body.first + req.body.second});
+				const result = req.body.first + req.body.second;
+				debug('result - %s', result);
+				return sendOK(res, {result});
 			} catch(ex) {
 				sendError(res, 400, ex);
 			}
 		}],
-		post_subtraction: [defaultMiddlewares.setNoCache, async (req: Request, res: Response) => {
-			debug('post_subtraction - ', req.body);
+		// setNoCache -- example with no cache enableds
+		post_subtraction: [setNoCache, async (req: Request, res: Response) => {
+			debug('post_subtraction - %o', req.body);
 			try {
-				return sendOK(res, {result: req.body.first - req.body.second});
+				const result = req.body.first - req.body.second;
+				debug('result - %s', result);
+				return sendOK(res, {result});
 			} catch(ex) {
 				sendError(res, 400, ex);
 			}
 		}],
-		post_multiplication: [defaultMiddlewares.setNoCache, async (req: Request, res: Response) => {
-			debug('post_multiplication - ', req.body);
+		post_multiplication: [async (req: Request, res: Response) => {
+			debug('post_multiplication - %o', req.body);
 			try {
-				return sendOK(res, {result: req.body.first * req.body.second});
+				const result = req.body.first * req.body.second;
+				debug('result - %s', result);
+				return sendOK(res, {result});
 			} catch(ex) {
 				sendError(res, 400, ex);
 			}
 		}],
-		post_division: [defaultMiddlewares.setNoCache, requiresIAM, async (req: Request, res: Response) => {
-			debug('post_division - ', req.body);
+		// requiresIAM -- example with IAM required
+		post_division: [requiresIAM, async (req: Request, res: Response) => {
+			debug('post_division - %o', req.body);
 			try {
-				return sendOK(res, {result: req.body.first / req.body.second});
+				const result = req.body.first / req.body.second;
+				debug('result - %s', result);
+				return sendOK(res, {result});
 			} catch(ex) {
 				sendError(res, 400, ex);
 			}

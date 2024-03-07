@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Example of a lambda function using express and openapi spec",
   "private": true,
-  "main": "src/app.js",
+  "main": "src/index.js",
   "scripts": {
     "test": "npm run build && NODE_OPTIONS=--experimental-vm-modules npx jest --detectOpenHandles --forceExit",
     "test-silent": "npm run build && NODE_OPTIONS=--experimental-vm-modules npx jest --detectOpenHandles --forceExit --silent",
@@ -24,6 +24,7 @@
     "@types/express": "^4.17.21",
     "@types/jest": "^29.5.12",
     "@types/jws": "^3.2.9",
+    "@types/supertest": "^6.0.2",
     "@typescript-eslint/eslint-plugin": "^7.1.1",
     "@typescript-eslint/parser": "^7.1.1",
     "eslint": "^8.57.0",

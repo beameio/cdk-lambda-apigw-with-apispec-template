@@ -40,7 +40,7 @@ export function setNoCache(req: Request, res: Response, next: NextFunction) {
 	res.set('Cache-Control', 'no-cache, no-store');
 	return next();
 }
-export async function requiresIAM(req: RequestWithContext, res: Response, next: NextFunction) {
+export function requiresIAM(req: RequestWithContext, res: Response, next: NextFunction) {
 	// IAM is validated on API GW, based on https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-mapping-template-reference.html
 	// $context.identity.user = The principal identifier of the user that will be authorized against resource access. Supported for resources that use IAM authorization.
 	return req.context?.identity?.user ? next() : sendError(res, 403, 'IAM auth is required');

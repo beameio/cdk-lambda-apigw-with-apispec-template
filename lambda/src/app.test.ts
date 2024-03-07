@@ -42,11 +42,11 @@ describe('/v1/datetime', () => {
 	{method: '/v1/addition', validation: (a: number, b: number) => a + b},
 	{method: '/v1/subtraction', validation: (a: number, b: number) => a - b},
 	{method: '/v1/multiplication', validation: (a: number, b: number) => a * b},
-	{method: '/v1/division', validation: (a: number, b: number) => a / b, isDivision: true},
+	{method: '/v1/division', validation: (a: number, b: number) => a / b, isDivision: true, isIAMRequired: true},
 ].forEach(api => {
 	describe(api.method, () => {
 		const endpoint = api.method;
-		const authHeaders =  api.isDivision ? iam_headers : user_bearer_headers;
+		const authHeaders =  api.isIAMRequired ? iam_headers : user_bearer_headers;
 		test('post - integers', async () => {
 			const response = await request(app)
 				.post(endpoint)

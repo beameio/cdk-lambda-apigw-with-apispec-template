@@ -11,10 +11,10 @@ import {debugRequest, extractToken, handleError, RequestWithContext, ContextType
 
 export default function init(routes = initRoutes()) {
 	const app = express();
-	app.use(cors());
+	app.use(cors()); // allow cors
 	app.use(express.json()); // automatically parse the incoming requests with JSON payloads (needed to correctly validate OpenApiValidator requests)
-	app.use(debugRequest);
-	app.use(extractToken); // extracts JWT token (if existing)
+	app.use(debugRequest); // prints debug information on the call
+	app.use(extractToken); // extracts JWT token (if existing) - available extracted at `res.locals.token_payload`
 	app.use(OpenApiValidator.middleware({
 		apiSpec: (isLambdaEnv ? './' : './../') + 'openapi.yaml', // openapi spec is copied to the function folder
 		validateApiSpec: true,
@@ -30,7 +30,7 @@ export default function init(routes = initRoutes()) {
 				const path = route.openApiRoute.substring(route.basePath.length);
 				const operation = apiDoc.paths[path][method];
 				assert(operation, `Unable to find operation with '${path}' and '${method}'`);
-				const operationId = operation.operationId;
+				const operationId = operation.operationId; // check method on operationId fields, by default library checks on x-eov-operation-handler
 				assert(operationId, `OperationId is not available for operation with '${path}' and '${method}'`);
 				const func = routes[operationId as keyof typeof routes];
 				assert(func, `Could not find '${operationId}' function in routes when trying to route [${route.method} ${route.expressRoute}].`)
@@ -42,6 +42,6 @@ export default function init(routes = initRoutes()) {
 			}
 		}
 	}));
-	app.use(handleError);
+	app.use(handleError); // handle errors in case they exist
 	return app;
 }

@@ -16,22 +16,31 @@ tags:
 
 components:
   securitySchemes:
-    iamAuth:
+    sigv4:
       type: apiKey
+      name: Authorization
       in: header
-      name: x-amz-security-token
-      x-amazon-apigateway-authtype: 'awsSigv4'
-      description: 'IAM access. Used by internal infrastructure, like cognito and lambdas'
-    userAuth:
-      type: oauth2
-      flows:
-        authorizationCode:
-          authorizationUrl: /oauth2/authorize
-          tokenUrl: /oauth2/token
-          scopes:
-            openid: Grants openid profile
-            profile: Grants auth2 profile
-            email: Grants auth2 email scope
+      x-amazon-apigateway-authtype: awsSigv4
+      description: IAM access. Used by internal infrastructure, like cognito and lambdas
+    cognitoAuth:
+      type: apiKey
+      name: Authorization
+      in: header
+      x-amazon-apigateway-authtype: cognito_user_pools
+      x-amazon-apigateway-authorizer:
+        type: cognito_user_pools
+        providerARNs:
+          - "arn:${AWS::Partition}:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/eu-central-1_PzIZW4kPr"
+
+  x-amazon-apigateway-integrations:
+    lambda:
+      type: aws_proxy
+      httpMethod: POST
+      uri: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFunction.Arn}/invocations"
+      passthroughBehavior: "when_no_templates"
+      responses:
+        default:
+          statusCode: 200
 
   requestBodies:
     operationsRequest:
@@ -95,6 +104,8 @@ paths:
                     type: string
                     format: date-time
                     readOnly: true
+      x-amazon-apigateway-integration:
+        "$ref": "#/components/x-amazon-apigateway-integrations/lambda"
 
   /addition:
     post:
@@ -103,12 +114,14 @@ paths:
         - Operations
       description: Calculates the addition of 2 numbers
       security:
-        - userAuth: [ profile, openid, email ]
+        - cognitoAuth: []
       requestBody:
         $ref: '#/components/requestBodies/operationsRequest'
       responses:
         '200':
           $ref: '#/components/responses/operationsResponse'
+      x-amazon-apigateway-integration:
+        "$ref": "#/components/x-amazon-apigateway-integrations/lambda"
 
   /subtraction:
     post:
@@ -117,12 +130,14 @@ paths:
         - Operations
       description: Calculates the subtraction of 2 numbers
       security:
-        - userAuth: [ profile, openid, email ]
+        - cognitoAuth: []
       requestBody:
         $ref: '#/components/requestBodies/operationsRequest'
       responses:
         '200':
           $ref: '#/components/responses/operationsResponse'
+      x-amazon-apigateway-integration:
+        "$ref": "#/components/x-amazon-apigateway-integrations/lambda"
 
   /multiplication:
     post:
@@ -131,12 +146,14 @@ paths:
         - Operations
       description: Calculates the multiplication of 2 numbers
       security:
-        - userAuth: [ profile, openid, email ]
+        - cognitoAuth: []
       requestBody:
         $ref: '#/components/requestBodies/operationsRequest'
       responses:
         '200':
           $ref: '#/components/responses/operationsResponse'
+      x-amazon-apigateway-integration:
+        "$ref": "#/components/x-amazon-apigateway-integrations/lambda"
 
   /division:
     post:
@@ -145,9 +162,11 @@ paths:
         - Operations
       description: Calculates the division of 2 numbers
       security:
-        - iamAuth: [ ]
+        - sigv4: [ ]
       requestBody:
         $ref: '#/components/requestBodies/operationsRequest'
       responses:
         '200':
           $ref: '#/components/responses/operationsResponse'
+      x-amazon-apigateway-integration:
+        "$ref": "#/components/x-amazon-apigateway-integrations/lambda"

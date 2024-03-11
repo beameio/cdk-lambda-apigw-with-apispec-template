@@ -30,17 +30,15 @@ components:
       x-amazon-apigateway-authorizer:
         type: cognito_user_pools
         providerARNs:
-          - "arn:${AWS::Partition}:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/eu-central-1_PzIZW4kPr"
+          - "${USERPOOL_ARN}"
 
-  x-amazon-apigateway-integrations:
-    lambda:
-      type: aws_proxy
-      httpMethod: POST
-      uri: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFunction.Arn}/invocations"
-      passthroughBehavior: "when_no_templates"
-      responses:
-        default:
-          statusCode: 200
+#  Unfortunately, only supported on httpApiGw and not on restApiGw (https://github.com/awsdocs/amazon-api-gateway-developer-guide/issues/65). Hail code duplication...
+#  x-amazon-apigateway-integrations:
+#    lambda:
+#      type: aws_proxy
+#      httpMethod: POST
+#      uri: "${LAMBDA_INVOCATION_URI}"
+#      passthroughBehavior: "when_no_match"
 
   requestBodies:
     operationsRequest:
@@ -91,7 +89,7 @@ paths:
       tags:
         - DateTime
       description: Retrieves the api current date time
-      security: [] # No Security
+      security: [] # No Security, anyone can call
       responses:
         '200':
           description: Operation has completed successfully
@@ -105,7 +103,10 @@ paths:
                     format: date-time
                     readOnly: true
       x-amazon-apigateway-integration:
-        "$ref": "#/components/x-amazon-apigateway-integrations/lambda"
+        type: aws_proxy
+        httpMethod: POST
+        uri: "${LAMBDA_INVOCATION_URI}"
+        passthroughBehavior: "when_no_match"
 
   /addition:
     post:
@@ -121,7 +122,10 @@ paths:
         '200':
           $ref: '#/components/responses/operationsResponse'
       x-amazon-apigateway-integration:
-        "$ref": "#/components/x-amazon-apigateway-integrations/lambda"
+        type: aws_proxy
+        httpMethod: POST
+        uri: "${LAMBDA_INVOCATION_URI}"
+        passthroughBehavior: "when_no_match"
 
   /subtraction:
     post:
@@ -137,7 +141,10 @@ paths:
         '200':
           $ref: '#/components/responses/operationsResponse'
       x-amazon-apigateway-integration:
-        "$ref": "#/components/x-amazon-apigateway-integrations/lambda"
+        type: aws_proxy
+        httpMethod: POST
+        uri: "${LAMBDA_INVOCATION_URI}"
+        passthroughBehavior: "when_no_match"
 
   /multiplication:
     post:
@@ -153,7 +160,10 @@ paths:
         '200':
           $ref: '#/components/responses/operationsResponse'
       x-amazon-apigateway-integration:
-        "$ref": "#/components/x-amazon-apigateway-integrations/lambda"
+        type: aws_proxy
+        httpMethod: POST
+        uri: "${LAMBDA_INVOCATION_URI}"
+        passthroughBehavior: "when_no_match"
 
   /division:
     post:
@@ -162,11 +172,14 @@ paths:
         - Operations
       description: Calculates the division of 2 numbers
       security:
-        - sigv4: [ ]
+        - sigv4: []
       requestBody:
         $ref: '#/components/requestBodies/operationsRequest'
       responses:
         '200':
           $ref: '#/components/responses/operationsResponse'
       x-amazon-apigateway-integration:
-        "$ref": "#/components/x-amazon-apigateway-integrations/lambda"
+        type: aws_proxy
+        httpMethod: POST
+        uri: "${LAMBDA_INVOCATION_URI}"
+        passthroughBehavior: "when_no_match"

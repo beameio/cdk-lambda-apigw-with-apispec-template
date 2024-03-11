@@ -1,11 +1,14 @@
 import * as cdk from 'aws-cdk-lib';
+import * as path from 'path';
+import * as fs from 'fs';
+import * as yaml from 'yaml';
 import {Construct} from 'constructs';
 import {ApiDefinition, SpecRestApi} from 'aws-cdk-lib/aws-apigateway';
 import {NodejsFunction} from 'aws-cdk-lib/aws-lambda-nodejs';
 import {Runtime} from 'aws-cdk-lib/aws-lambda';
-import * as path from 'path';
+
 import {AccountRecovery, Mfa, UserPool, VerificationEmailStyle} from 'aws-cdk-lib/aws-cognito';
-import {RemovalPolicy} from 'aws-cdk-lib';
+import {Aws, RemovalPolicy} from 'aws-cdk-lib';
 
 export class InfraStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -30,24 +33,13 @@ export class InfraStack extends cdk.Stack {
       },
       removalPolicy: RemovalPolicy.DESTROY
     })
-    userPool.addClient('app-client', {
-      userPoolClientName: 'app-client',
-      authFlows: {
-        userPassword: true,
-      },
-    });
 
-    new SpecRestApi(this, 'ApiGw', {
-      apiDefinition: ApiDefinition.fromAsset(path.join('..', 'openapi.yaml')),
-    });
-
-    new NodejsFunction(this, 'LambdaFunction', {
-      functionName: 'LambdaFunction',
+    const lambda = new NodejsFunction(this, 'LambdaFunction', {
       runtime: Runtime.NODEJS_18_X,
       bundling: {
         commandHooks: {
           beforeBundling(_: string, outputDir: string) {
-            return [`cp ../openapi.yaml "${outputDir}"`, `npm install`];
+            return [`cp ../openapi.yaml "${outputDir}"`, `npm install`, `npm run setup`];
           },
           beforeInstall() {return []},
           afterBundling() {return []}
@@ -60,5 +52,18 @@ export class InfraStack extends cdk.Stack {
         DEBUG: 'beame:*'
       }
     });
+
+    const openApi = fs.readFileSync(path.join('..', 'openapi.yaml'), {encoding: 'utf8'})
+        //${LAMBDA_INVOCATION_URI} - arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFunction.Arn}/invocations
+        .replaceAll('${LAMBDA_INVOCATION_URI}', `arn:${Aws.PARTITION}:apigateway:${Aws.REGION}:lambda:path/2015-03-31/functions/${lambda.functionArn}/invocations`)
+        .replaceAll('${USERPOOL_ARN}', userPool.userPoolArn);
+
+    console.log(openApi);
+
+    const apiGw = new SpecRestApi(this, 'ApiGw', {
+      apiDefinition: ApiDefinition.fromInline(yaml.parse(openApi)),
+    });
+    apiGw.node.addDependency(userPool);
+    apiGw.node.addDependency(lambda);
   }
 }

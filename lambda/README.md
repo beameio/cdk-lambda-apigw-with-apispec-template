@@ -11,13 +11,13 @@ then access via browser to 'http://localhost:5001/v1/datetime' to quickly or ref
 
 ### API datetime
 ```bash
-$ curl --location 'localhost:5001/v1/datetime'
+$ curl --location 'localhost:5001/datetime'
 {"result":"2024-03-06T18:53:22.983Z"}
 ```
 
 ### API addition 
 ``` bash
-$ curl --location 'localhost:5001/v1/addition' --header 'Content-Type: application/json' --data '{
+$ curl --location 'localhost:5001/addition' --header 'Content-Type: application/json' --data '{
     "first": 4,
     "second": 3
 }'
@@ -26,7 +26,7 @@ $ curl --location 'localhost:5001/v1/addition' --header 'Content-Type: applicati
 
 ### API subtraction
 ``` bash
-$ curl --location 'localhost:5001/v1/subtraction' --header 'Content-Type: application/json' --data '{
+$ curl --location 'localhost:5001/subtraction' --header 'Content-Type: application/json' --data '{
     "first": 3,
     "second": 5
 }'
@@ -35,7 +35,7 @@ $ curl --location 'localhost:5001/v1/subtraction' --header 'Content-Type: applic
 
 ### API multiplication
 ``` bash
-$ curl --location 'localhost:5001/v1/multiplication' --header 'Content-Type: application/json' --data '{
+$ curl --location 'localhost:5001/multiplication' --header 'Content-Type: application/json' --data '{
     "first": 3.1,
     "second": 5
 }'
@@ -44,7 +44,7 @@ $ curl --location 'localhost:5001/v1/multiplication' --header 'Content-Type: app
 
 ### API division
 ``` bash
-$ curl --location 'localhost:5001/v1/division' --header 'Content-Type: application/json' --data '{
+$ curl --location 'localhost:5001/division' --header 'Content-Type: application/json' --data '{
     "first": 4,
     "second": 2
 }'
@@ -55,7 +55,7 @@ $ curl --location 'localhost:5001/v1/division' --header 'Content-Type: applicati
 
 * `division` is protected with iam role as an example, not sending the `x-amz-security-token` will return 500 error, as expected.
 ```bash
-$ curl --location 'localhost:5001/v1/division' --header 'Content-Type: application/json' --data '{
+$ curl --location 'localhost:5001/division' --header 'Content-Type: application/json' --data '{
     "first": 4,
     "second": 2
 }'
@@ -63,7 +63,7 @@ $ curl --location 'localhost:5001/v1/division' --header 'Content-Type: applicati
 ```
 * sending wrong body
 ```bash
-$ curl --location 'localhost:5001/v1/subtraction' --header 'Content-Type: application/json' --data '{
+$ curl --location 'localhost:5001/subtraction' --header 'Content-Type: application/json' --data '{
     "first": 3,
     "third": 5
 }'
@@ -71,7 +71,7 @@ $ curl --location 'localhost:5001/v1/subtraction' --header 'Content-Type: applic
 ```
 * sending wrong data type
 ```bash
-$ curl --location 'localhost:5001/v1/subtraction' --header 'Content-Type: application/json' --data '{
+$ curl --location 'localhost:5001/subtraction' --header 'Content-Type: application/json' --data '{
     "first": "3",
     "second": 5
 }'

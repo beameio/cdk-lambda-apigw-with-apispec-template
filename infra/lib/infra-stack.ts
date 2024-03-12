@@ -61,6 +61,9 @@ export class InfraStack extends cdk.Stack {
     console.log(openApi);
 
     const apiGw = new SpecRestApi(this, 'ApiGw', {
+      deployOptions: {
+        stageName: 'v1'
+      },
       apiDefinition: ApiDefinition.fromInline(yaml.parse(openApi)),
     });
     apiGw.node.addDependency(userPool);

@@ -3,7 +3,7 @@ The code in this folder is an example of an api implementation that can run in A
 
 ## Running locally
 `
-npx ts-node src/app.ts
+npx ts-node src/index.ts
 `
 
 then access via browser to 'http://localhost:5001/v1/datetime' to quickly or refer to one of the examples below (PostMan or other tool to make requests can be used)

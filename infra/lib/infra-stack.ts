@@ -8,7 +8,8 @@ import {NodejsFunction} from 'aws-cdk-lib/aws-lambda-nodejs';
 import {Runtime} from 'aws-cdk-lib/aws-lambda';
 
 import {AccountRecovery, Mfa, UserPool, VerificationEmailStyle} from 'aws-cdk-lib/aws-cognito';
-import {Aws, RemovalPolicy} from 'aws-cdk-lib';
+import {Aws, Duration, RemovalPolicy} from 'aws-cdk-lib';
+import {ServicePrincipal} from 'aws-cdk-lib/aws-iam';
 
 export class InfraStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -50,7 +51,9 @@ export class InfraStack extends cdk.Stack {
       description: 'Lambda function',
       environment: {
         DEBUG: 'beame:*'
-      }
+      },
+      timeout: Duration.seconds(30),
+      memorySize: 256
     });
 
     const openApi = fs.readFileSync(path.join('..', 'openapi.yaml'), {encoding: 'utf8'})
@@ -61,12 +64,12 @@ export class InfraStack extends cdk.Stack {
     console.log(openApi);
 
     const apiGw = new SpecRestApi(this, 'ApiGw', {
-      deployOptions: {
-        stageName: 'v1'
-      },
       apiDefinition: ApiDefinition.fromInline(yaml.parse(openApi)),
     });
     apiGw.node.addDependency(userPool);
-    apiGw.node.addDependency(lambda);
+
+    lambda.grantInvoke(new ServicePrincipal("apigateway.amazonaws.com").withConditions(
+        { "ArnLike": { "aws:SourceArn": apiGw.arnForExecuteApi() } }
+    ))
   }
 }

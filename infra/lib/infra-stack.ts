@@ -63,7 +63,7 @@ export class InfraStack extends cdk.Stack {
 
     const openApi = fs.readFileSync(path.join('..', 'openapi.yaml'), {encoding: 'utf8'})
         .replaceAll('${LAMBDA_INVOCATION_URI}', `arn:${Aws.PARTITION}:apigateway:${Aws.REGION}:lambda:path/2015-03-31/functions/${lambda.functionArn}/invocations`)
-        .replaceAll('${USERPOOL_ID}', userPool.userPoolId);
+        .replaceAll('${USERPOOL_ARN}', userPool.userPoolArn);
 
     const apiGw = new SpecRestApi(this, 'ApiGw', {
       apiDefinition: ApiDefinition.fromInline(yaml.parse(openApi)),

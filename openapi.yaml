@@ -21,17 +21,17 @@ components:
       name: Authorization
       in: header
       x-amazon-apigateway-authtype: awsSigv4
-      description: IAM access. Used by internal infrastructure, like cognito and lambdas
+      description: IAM access. Used by internal infrastructure, like lambdas
 
-    cognitoAuth:
+    userPoolAuthorizer:
       type: http
       scheme: bearer
       bearerFormat: JWT
+      x-amazon-apigateway-authtype: cognito_user_pools
       x-amazon-apigateway-authorizer:
-        type: jwt
-        identitySource: "$request.header.Authorization"
-        jwtConfiguration:
-          issuer: "https://cognito-idp.region.amazonaws.com/${USERPOOL_ID}"
+        type: cognito_user_pools
+        providerARNs:
+          - "${USERPOOL_ARN}"
 
 #  Unfortunately, only supported on httpApiGw and not on restApiGw (https://github.com/awsdocs/amazon-api-gateway-developer-guide/issues/65). Hail code duplication...
 #  x-amazon-apigateway-integrations:

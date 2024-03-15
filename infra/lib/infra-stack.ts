@@ -6,7 +6,6 @@ import {Construct} from 'constructs';
 import {ApiDefinition, SpecRestApi} from 'aws-cdk-lib/aws-apigateway';
 import {NodejsFunction} from 'aws-cdk-lib/aws-lambda-nodejs';
 import {Runtime} from 'aws-cdk-lib/aws-lambda';
-
 import {AccountRecovery, Mfa, UserPool, VerificationEmailStyle} from 'aws-cdk-lib/aws-cognito';
 import {Aws, Duration, RemovalPolicy} from 'aws-cdk-lib';
 import {ServicePrincipal} from 'aws-cdk-lib/aws-iam';
@@ -35,6 +34,12 @@ export class InfraStack extends cdk.Stack {
       removalPolicy: RemovalPolicy.DESTROY
     })
 
+    // app client, for easy testing with Postman
+    userPool.addDomain('CognitoDomain', {cognitoDomain: {domainPrefix: 'cdklambdaapitest'}}); // oauth2 baseurl will change to cdklambdaapitest.auth.$REGION.amazoncognito.com
+    userPool.addClient('TestClient', {
+      generateSecret: true,
+    });
+
     const lambda = new NodejsFunction(this, 'LambdaFunction', {
       runtime: Runtime.NODEJS_18_X,
       bundling: {
@@ -57,9 +62,8 @@ export class InfraStack extends cdk.Stack {
     });
 
     const openApi = fs.readFileSync(path.join('..', 'openapi.yaml'), {encoding: 'utf8'})
-        //${LAMBDA_INVOCATION_URI} - arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFunction.Arn}/invocations
         .replaceAll('${LAMBDA_INVOCATION_URI}', `arn:${Aws.PARTITION}:apigateway:${Aws.REGION}:lambda:path/2015-03-31/functions/${lambda.functionArn}/invocations`)
-        .replaceAll('${USERPOOL_ARN}', userPool.userPoolArn);
+        .replaceAll('${USERPOOL_ID}', userPool.userPoolId);
 
     console.log(openApi);
 

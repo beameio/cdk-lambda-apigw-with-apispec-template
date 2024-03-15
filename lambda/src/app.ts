@@ -7,19 +7,20 @@ import {OpenAPIV3} from 'express-openapi-validator/dist/framework/types';
 
 import {isLambdaEnv} from './helpers';
 import initRoutes from './routes';
-import {debugRequest, extractToken, handleError, RequestWithContext, ContextType} from './middlewares';
+import {debugRequest, extractTokenPayload, handleError} from './middlewares';
 
 export default function init(routes = initRoutes()) {
 	const app = express();
 	app.use(cors()); // allow cors
 	app.use(express.json()); // automatically parse the incoming requests with JSON payloads (needed to correctly validate OpenApiValidator requests)
 	app.use(debugRequest); // prints debug information on the call
-	app.use(extractToken); // extracts JWT token (if existing) - available extracted at `res.locals.token_payload`
+	app.use(extractTokenPayload); // helper that extracts token payload (if existing) - available extracted at `res.locals.token_payload`
 	app.use(OpenApiValidator.middleware({
 		apiSpec: (isLambdaEnv ? './' : './../') + 'openapi.yaml', // openapi spec is copied to the function folder
 		validateApiSpec: true,
+		validateSecurity: true, // basic security checks, can be extended by implementing security handlers
 		validateRequests: true, // (default)
-		validateResponses: true, // false by default,
+		validateResponses: true, // false by default
 		operationHandlers: {
 			basePath: './',
 			// override because default resolver doesn't import correctly ES modules

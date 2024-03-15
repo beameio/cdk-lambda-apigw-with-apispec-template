@@ -12,14 +12,15 @@ export function debugRequest(req: Request, res: Response, next: NextFunction) {
 	debug('%s %s: { headers: %o, body: %o }', req.method, req.url, req.headers, req.body);
 	return next();
 }
-export function extractToken(req: Request, res: Response, next: NextFunction) {
-	// token is validated by API GW, so we just need to decode it if it's present
+export function extractTokenPayload(req: Request, res: Response, next: NextFunction) {
 	const token = req.headers.authorization?.split(' ');
 	if (token && token.length > 1) {
 		// Handle token type and decode it
 		switch (token[0].toLowerCase()) {
 			case 'bearer':
-				res.locals.token_payload = JSON.parse(jwt.decode(token[1]).payload);
+				const payload = jwt.decode(token[1]).payload;
+				// Some providers (like GitHub) return the payload as string, so we need to parse it
+				res.locals.token_payload = typeof payload === 'string' ? JSON.parse(payload) : payload;
 				debug('Decoded payload: %o', res.locals.token_payload);
 				break;
 			default:

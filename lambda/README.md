@@ -17,7 +17,7 @@ $ curl --location 'localhost:5001/datetime'
 
 ### API addition 
 ``` bash
-$ curl --location 'localhost:5001/addition' --header 'Content-Type: application/json' --data '{
+$ curl --location 'localhost:5001/addition' --header 'Content-Type: application/json' --header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c' --data '{
     "first": 4,
     "second": 3
 }'
@@ -26,7 +26,7 @@ $ curl --location 'localhost:5001/addition' --header 'Content-Type: application/
 
 ### API subtraction
 ``` bash
-$ curl --location 'localhost:5001/subtraction' --header 'Content-Type: application/json' --data '{
+$ curl --location 'localhost:5001/subtraction' --header 'Content-Type: application/json' --header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c' --data '{
     "first": 3,
     "second": 5
 }'
@@ -35,7 +35,7 @@ $ curl --location 'localhost:5001/subtraction' --header 'Content-Type: applicati
 
 ### API multiplication
 ``` bash
-$ curl --location 'localhost:5001/multiplication' --header 'Content-Type: application/json' --data '{
+$ curl --location 'localhost:5001/multiplication' --header 'Content-Type: application/json' --header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c' --data '{
     "first": 3.1,
     "second": 5
 }'
@@ -43,13 +43,16 @@ $ curl --location 'localhost:5001/multiplication' --header 'Content-Type: applic
 ```
 
 ### API division
+Since division is protected with IAM role, it will return 403 error since the context?.identity?.user is not present in the request when running locally. 
 ``` bash
 $ curl --location 'localhost:5001/division' --header 'Content-Type: application/json' --data '{
     "first": 4,
     "second": 2
 }'
-{"result":2}
+{"title":"IAM auth is required","status":403}
 ```
+To test locally set temporarily the `validateSecurity` to `false` in `src/app.ts` and build and run the server again.
+Unit tests already bypass this correctly and should be the main source of local testing.
 
 ### Testing wrong calls
 

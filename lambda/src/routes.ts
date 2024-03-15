@@ -16,9 +16,11 @@ export default function init(requiresIAM = defaultMiddlewares.requiresIAM, setNo
 		// operations
 		post_addition: [async (req: Request, res: Response) => {
 			debug('post_addition - %o', req.body);
-			// Example on using authentication payload (parsed already via middleware when available)
+
+			// token_payload -- Example on using authentication payload (parsed already via middleware when available)
 			debug('authentication headers - %s', req.headers.authorization);
 			debug('authentication payload - %s', res.locals.token_payload);
+
 			try {
 				const result = req.body.first + req.body.second;
 				debug('result - %s', result);
@@ -27,7 +29,7 @@ export default function init(requiresIAM = defaultMiddlewares.requiresIAM, setNo
 				sendError(res, 400, ex);
 			}
 		}],
-		// setNoCache -- example with no cache enableds
+		// setNoCache -- example with no cache enabled
 		post_subtraction: [setNoCache, async (req: Request, res: Response) => {
 			debug('post_subtraction - %o', req.body);
 			try {

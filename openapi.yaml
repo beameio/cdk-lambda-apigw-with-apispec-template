@@ -22,15 +22,16 @@ components:
       in: header
       x-amazon-apigateway-authtype: awsSigv4
       description: IAM access. Used by internal infrastructure, like cognito and lambdas
+
     cognitoAuth:
-      type: apiKey
-      name: Authorization
-      in: header
-      x-amazon-apigateway-authtype: cognito_user_pools
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
       x-amazon-apigateway-authorizer:
-        type: cognito_user_pools
-        providerARNs:
-          - "${USERPOOL_ARN}"
+        type: jwt
+        identitySource: "$request.header.Authorization"
+        jwtConfiguration:
+          issuer: "https://cognito-idp.region.amazonaws.com/${USERPOOL_ID}"
 
 #  Unfortunately, only supported on httpApiGw and not on restApiGw (https://github.com/awsdocs/amazon-api-gateway-developer-guide/issues/65). Hail code duplication...
 #  x-amazon-apigateway-integrations:
@@ -50,6 +51,28 @@ components:
             $ref: '#/components/schemas/operationsRequestSchema'
 
   responses:
+    iamRequired:
+      description: IAM auth is required for this operation
+      headers:
+        Content-Language:
+          schema:
+            type: string
+            example: en-US
+      content:
+        application/problem+json:
+          schema:
+            type: object
+            properties:
+              title:
+                type: string
+                default: 'IAM auth is required'
+              status:
+                type: number
+                default: 403
+          example:
+            title: IAM auth is required
+            status: 403
+
     operationsResponse:
       description: The response of an operation call
       content:
@@ -115,7 +138,7 @@ paths:
         - Operations
       description: Calculates the addition of 2 numbers
       security:
-        - cognitoAuth: []
+        - cognitoAuth: [email]
       requestBody:
         $ref: '#/components/requestBodies/operationsRequest'
       responses:
@@ -134,7 +157,7 @@ paths:
         - Operations
       description: Calculates the subtraction of 2 numbers
       security:
-        - cognitoAuth: []
+        - cognitoAuth: [profile, email]
       requestBody:
         $ref: '#/components/requestBodies/operationsRequest'
       responses:
@@ -178,6 +201,8 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/operationsResponse'
+        '403':
+          $ref: '#/components/responses/iamRequired'
       x-amazon-apigateway-integration:
         type: aws_proxy
         httpMethod: POST

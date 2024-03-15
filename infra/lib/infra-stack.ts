@@ -65,8 +65,6 @@ export class InfraStack extends cdk.Stack {
         .replaceAll('${LAMBDA_INVOCATION_URI}', `arn:${Aws.PARTITION}:apigateway:${Aws.REGION}:lambda:path/2015-03-31/functions/${lambda.functionArn}/invocations`)
         .replaceAll('${USERPOOL_ID}', userPool.userPoolId);
 
-    console.log(openApi);
-
     const apiGw = new SpecRestApi(this, 'ApiGw', {
       apiDefinition: ApiDefinition.fromInline(yaml.parse(openApi)),
     });

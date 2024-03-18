@@ -138,7 +138,7 @@ paths:
         - Operations
       description: Calculates the addition of 2 numbers
       security:
-        - userPoolAuthorizer: ["openid", "profile"]
+        - userPoolAuthorizer: ["openid", "profile"] # if scopes are provided, it expects the authtoken, otherwise the idtoken -- https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-enable-cognito-user-pool.html (point 5)
       requestBody:
         $ref: '#/components/requestBodies/operationsRequest'
       responses:

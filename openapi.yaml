@@ -138,7 +138,7 @@ paths:
         - Operations
       description: Calculates the addition of 2 numbers
       security:
-        - userPoolAuthorizer: []
+        - userPoolAuthorizer: ["openid", "profile"]
       requestBody:
         $ref: '#/components/requestBodies/operationsRequest'
       responses:
@@ -157,7 +157,7 @@ paths:
         - Operations
       description: Calculates the subtraction of 2 numbers
       security:
-        - userPoolAuthorizer: []
+        - userPoolAuthorizer: ["openid", "profile"]
       requestBody:
         $ref: '#/components/requestBodies/operationsRequest'
       responses:
@@ -176,7 +176,7 @@ paths:
         - Operations
       description: Calculates the multiplication of 2 numbers
       security:
-        - userPoolAuthorizer: []
+        - userPoolAuthorizer: ["openid", "profile"]
       requestBody:
         $ref: '#/components/requestBodies/operationsRequest'
       responses:

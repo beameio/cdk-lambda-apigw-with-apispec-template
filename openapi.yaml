@@ -24,9 +24,9 @@ components:
       description: IAM access. Used by internal infrastructure, like lambdas
 
     userPoolAuthorizer:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
+      type: apiKey
+      name: Authorization
+      in: header
       x-amazon-apigateway-authtype: cognito_user_pools
       x-amazon-apigateway-authorizer:
         type: cognito_user_pools
@@ -138,7 +138,7 @@ paths:
         - Operations
       description: Calculates the addition of 2 numbers
       security:
-        - cognitoAuth: [email]
+        - userPoolAuthorizer: []
       requestBody:
         $ref: '#/components/requestBodies/operationsRequest'
       responses:
@@ -157,7 +157,7 @@ paths:
         - Operations
       description: Calculates the subtraction of 2 numbers
       security:
-        - cognitoAuth: [profile, email]
+        - userPoolAuthorizer: []
       requestBody:
         $ref: '#/components/requestBodies/operationsRequest'
       responses:
@@ -176,7 +176,7 @@ paths:
         - Operations
       description: Calculates the multiplication of 2 numbers
       security:
-        - cognitoAuth: []
+        - userPoolAuthorizer: []
       requestBody:
         $ref: '#/components/requestBodies/operationsRequest'
       responses:

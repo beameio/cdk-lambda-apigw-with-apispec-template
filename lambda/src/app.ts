@@ -26,8 +26,8 @@ export default function init(routes = initRoutes()) {
 			// override because default resolver doesn't import correctly ES modules
 			// and also avoids having x-eov-operation-handler in the openapi spec
 			resolver: (basePath: string, route: RouteMetadata, apiDoc: OpenAPIV3.Document) => {
-				type methodTypes = 'get' | 'put' | 'post' | 'delete' | 'options' | 'head' | 'patch' | 'trace';
-				const method = route.method.toLowerCase() as methodTypes;
+				type methodType = 'get' | 'put' | 'post' | 'delete' | 'options' | 'head' | 'patch' | 'trace';
+				const method = route.method.toLowerCase() as methodType;
 				const path = route.openApiRoute.substring(route.basePath.length);
 				const operation = apiDoc.paths[path][method];
 				assert(operation, `Unable to find operation with '${path}' and '${method}'`);

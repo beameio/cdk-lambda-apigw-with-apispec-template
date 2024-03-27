@@ -50,7 +50,7 @@ export default function init(requiresIAM = defaultMiddlewares.requiresIAM, setNo
 				sendError(res, 400, ex);
 			}
 		}],
-		// requiresIAM -- example with IAM required
+		// requiresIAM -- API Gw already validates IAM permissions, requireIAM is a way to enforce it on server side and serve as an example on how to handle it
 		post_division: [requiresIAM, async (req: Request, res: Response) => {
 			debug('post_division - %o', req.body);
 			try {
